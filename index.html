@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>FlappyNovsky - ЛДПР</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient-layer" aria-hidden="true"></div>
+
+    <main class="site-shell" id="app-root">
+      <section class="game-stage">
+        <div class="intro-splash active" id="intro-splash">
+          <video id="intro-video" class="intro-video" preload="auto" playsinline>
+            <source src="./video/intro.mp4" type="video/mp4" />
+          </video>
+          <button class="intro-tap hidden" id="intro-tap" type="button">Нажми, чтобы включить заставку со звуком</button>
+        </div>
+
+        <canvas id="game-canvas" width="960" height="540" aria-label="FlappyNovsky"></canvas>
+
+        <div class="hud hidden" id="hud">
+          <div class="hud-item">
+            <span class="hud-label">Счёт</span>
+            <span class="hud-value" id="score-value">0</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Рекорд</span>
+            <span class="hud-value" id="best-score-value">0</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Медали</span>
+            <span class="hud-value" id="run-medals-value">0</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Редкие</span>
+            <span class="hud-value" id="run-rare-value">0</span>
+          </div>
+          <div class="hud-item hud-item--bonus">
+            <span class="hud-label">Бонус</span>
+            <span class="hud-value" id="bonus-value">-</span>
+          </div>
+        </div>
+        <div class="lives-hud hidden" id="lives-hud" aria-label="Жизни">
+          <span class="life-heart" data-life-slot="0" aria-hidden="true"></span>
+          <span class="life-heart" data-life-slot="1" aria-hidden="true"></span>
+          <span class="life-heart" data-life-slot="2" aria-hidden="true"></span>
+          <span class="life-heart" data-life-slot="3" aria-hidden="true"></span>
+          <span class="life-heart" data-life-slot="4" aria-hidden="true"></span>
+        </div>
+
+        <div class="status-banner hidden" id="status-banner"></div>
+        <div class="quote-popup hidden" id="quote-popup"></div>
+        <div class="result-overlay hidden" id="result-overlay">
+          <div class="result-card">
+            <h3 id="result-title">Игра окончена</h3>
+            <div class="result-stats" id="result-stats">
+              <div class="result-stat">
+                <span class="result-stat-label">Счёт</span>
+                <span class="result-stat-value" id="result-score-value">0</span>
+              </div>
+              <div class="result-stat result-stat--medal">
+                <span class="result-medal-spin" aria-hidden="true"></span>
+                <span class="result-stat-label">Медали</span>
+                <span class="result-stat-value" id="result-medals-value">+0</span>
+              </div>
+              <div class="result-stat result-stat--rare">
+                <span class="result-rare-icon" aria-hidden="true"></span>
+                <span class="result-stat-label">Редкие</span>
+                <span class="result-stat-value" id="result-rare-value">+0</span>
+              </div>
+            </div>
+            <p id="result-subtitle">Забег завершён</p>
+            <div class="result-actions">
+              <button class="action-btn action-btn--primary" id="result-restart-btn" data-result-action="restart">
+                Начать заново
+              </button>
+              <button class="action-btn" id="result-menu-btn" data-result-action="menu">В главное меню</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel active" id="menu-screen">
+        <div class="menu-logo-wrap" aria-label="FlappyNovsky">
+          <img class="menu-logo-image" src="./assets/ui/menu-logo.png" alt="FlappyNovsky" />
+        </div>
+        <div class="panel-card panel-card--menu">
+          <div class="wallet-row">
+            <div class="wallet-chip">Медали ЛДПР: <span id="menu-medals-value">0</span></div>
+            <div class="wallet-chip wallet-chip--rare">Редкие медали: <span id="menu-rare-value">0</span></div>
+            <div class="wallet-chip">Рекорд: <span id="menu-best-value">0</span></div>
+            <div class="wallet-chip">Пресет: <span id="menu-preset-value">Сейв</span></div>
+            <div class="wallet-chip">Сердца: <span id="menu-hearts-cap-value">1</span>/5</div>
+            <div class="wallet-chip wallet-chip--rare">Купоны: <span id="menu-coupons-value">0</span></div>
+          </div>
+
+          <div class="head-easter-wrap">
+            <button class="head-easter-btn" id="head-easter-btn" type="button" aria-label="Голова Жириновского для пасхалки">
+              <img id="head-easter-image" src="./assets/heads/head-common.png" alt="Голова Жириновского" />
+            </button>
+          </div>
+
+          <div class="menu-actions">
+            <button class="action-btn action-btn--primary" data-open="play" id="play-button">Играть</button>
+            <button class="action-btn" data-open="shop">Магазин</button>
+            <button class="action-btn" data-open="achievements">Достижения</button>
+            <button class="action-btn" data-open="settings">Настройки</button>
+            <button class="action-btn" data-open="about-game">Об игре</button>
+            <button class="action-btn" data-open="about-devs">О разработчиках</button>
+          </div>
+
+          <p class="hint">
+            Управление: <kbd>Space</kbd> / клик / тап. Пауза: <kbd>P</kbd>. Fullscreen: <kbd>F</kbd>.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel" id="shop-screen">
+        <div class="panel-card panel-card--wide">
+          <h2>Магазин ЛДПР</h2>
+          <p class="subtitle">
+            Разделы магазина: скины, ивенты-локации и бусты. Локации открываются по прогрессу или
+            покупаются досрочно.
+          </p>
+
+          <div class="wallet-row wallet-row--shop">
+            <div class="wallet-chip">Медали ЛДПР: <span id="shop-medals-value">0</span></div>
+            <div class="wallet-chip wallet-chip--rare">Редкие медали: <span id="shop-rare-value">0</span></div>
+            <div class="wallet-chip wallet-chip--rare">Купоны: <span id="shop-coupons-value">0</span></div>
+            <div class="wallet-chip">Выбран: <span id="shop-active-skin">-</span></div>
+            <div class="wallet-chip">Пресет: <span id="shop-active-preset">Сейв</span></div>
+            <div class="wallet-chip">Сердца: <span id="shop-hearts-cap-value">1</span>/5</div>
+            <div class="wallet-chip">Уровень локаций: <span id="shop-loc-level">1</span>/8</div>
+            <div class="wallet-chip">Текущая локация: <span id="shop-active-location">-</span></div>
+          </div>
+
+          <div class="shop-tabs" role="tablist" aria-label="Разделы магазина">
+            <button class="shop-tab-btn active" type="button" data-shop-tab="skins" role="tab">Скины</button>
+            <button class="shop-tab-btn" type="button" data-shop-tab="events" role="tab">Ивенты</button>
+            <button class="shop-tab-btn" type="button" data-shop-tab="boosts" role="tab">Бусты</button>
+          </div>
+
+          <div id="shop-skins-view" class="shop-view active" role="tabpanel">
+            <div class="skin-grid" id="shop-skins"></div>
+          </div>
+
+          <div id="shop-events-view" class="shop-view" role="tabpanel">
+            <div class="event-grid" id="shop-events"></div>
+          </div>
+
+          <div id="shop-boosts-view" class="shop-view" role="tabpanel">
+            <div class="boost-layout">
+              <article class="boost-panel">
+                <h3 class="boost-title">Пресеты перед забегом</h3>
+                <p class="boost-hint">Сейв / Фарм / Риск. Применяются автоматически при старте.</p>
+                <div class="preset-grid" id="boost-presets"></div>
+              </article>
+
+              <article class="boost-panel">
+                <h3 class="boost-title">Инвентарь бустов</h3>
+                <p class="boost-hint">Остатки одноразовых бустов.</p>
+                <div class="boost-inventory-grid" id="boost-inventory"></div>
+              </article>
+
+              <article class="boost-panel">
+                <h3 class="boost-title">Ротация по локации</h3>
+                <p class="boost-hint" id="boost-rotation-hint">Ассортимент зависит от выбранного ивента.</p>
+                <button class="action-btn boost-coupon-btn" type="button" id="boost-coupon-toggle" data-toggle-coupon>
+                  Купон: выключен
+                </button>
+                <div class="boost-grid" id="boost-market"></div>
+              </article>
+
+              <article class="boost-panel">
+                <h3 class="boost-title">Наборы бустов (выгодно)</h3>
+                <p class="boost-hint">Пакеты дешевле, чем покупать по одному.</p>
+                <div class="boost-grid" id="boost-packs"></div>
+              </article>
+
+              <article class="boost-panel">
+                <h3 class="boost-title">Магазин дня</h3>
+                <p class="boost-hint" id="daily-shop-timer">Обновление ассортимента...</p>
+                <div class="boost-grid" id="daily-shop"></div>
+              </article>
+
+              <article class="boost-panel">
+                <h3 class="boost-title">Крафт</h3>
+                <p class="boost-hint">Обмен ресурсов и случайные бусты.</p>
+                <div class="boost-grid" id="craft-grid"></div>
+              </article>
+
+              <article class="boost-panel">
+                <h3 class="boost-title">Сердца (до 5)</h3>
+                <p class="boost-hint">Новый игрок стартует с 1 сердцем.</p>
+                <div class="boost-grid" id="heart-upgrade"></div>
+              </article>
+            </div>
+          </div>
+
+          <div class="inline-actions">
+            <button class="action-btn" data-open="menu">Назад в меню</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="achievements-screen">
+        <div class="panel-card panel-card--wide">
+          <h2>Доска достижений</h2>
+          <p class="subtitle">Локальный прогресс сохраняется в браузере автоматически.</p>
+          <div class="achievement-list" id="achievement-list"></div>
+          <div class="inline-actions">
+            <button class="action-btn" data-open="menu">Назад в меню</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="settings-screen">
+        <div class="panel-card">
+          <h2>Настройки</h2>
+
+          <div class="field field--cycler">
+            <span>Сложность</span>
+            <div class="cycle-control" role="group" aria-label="Сложность">
+              <button class="cycle-arrow" type="button" data-cycle-target="difficulty" data-cycle-dir="-1" aria-label="Сложность назад">
+                ◀
+              </button>
+              <span class="cycle-value" id="difficulty-value">Нормальная</span>
+              <button class="cycle-arrow" type="button" data-cycle-target="difficulty" data-cycle-dir="1" aria-label="Сложность вперед">
+                ▶
+              </button>
+            </div>
+          </div>
+
+          <div class="field field--cycler">
+            <span>Режим скорости</span>
+            <div class="cycle-control" role="group" aria-label="Режим скорости">
+              <button class="cycle-arrow" type="button" data-cycle-target="speed" data-cycle-dir="-1" aria-label="Режим назад">
+                ◀
+              </button>
+              <span class="cycle-value" id="speed-mode-value">Классический</span>
+              <button class="cycle-arrow" type="button" data-cycle-target="speed" data-cycle-dir="1" aria-label="Режим вперед">
+                ▶
+              </button>
+            </div>
+          </div>
+
+          <div class="field field--progress">
+            <span>Локации теперь открываются по уровню прогресса</span>
+            <p class="field-note">Текущий уровень: <strong id="settings-location-level">1/8</strong></p>
+            <p class="field-note" id="settings-location-hint">
+              Играй забеги, ставь рекорды и открывай достижения, чтобы поднимать уровень локаций.
+            </p>
+            <button class="action-btn" data-open="shop" type="button">Открыть раздел ивентов</button>
+          </div>
+
+          <label class="field field--switch">
+            <span>Звук эффектов</span>
+            <input id="sound-toggle" type="checkbox" checked />
+          </label>
+
+          <label class="field field--switch">
+            <span>Интенсивные эффекты</span>
+            <input id="effects-toggle" type="checkbox" checked />
+          </label>
+
+          <div class="inline-actions">
+            <button class="action-btn action-btn--primary" data-open="menu" id="settings-save-btn">Сохранить</button>
+            <button class="action-btn" data-open="menu">Назад</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="about-game-screen">
+        <div class="panel-card">
+          <h2>Об игре</h2>
+          <p>
+            FlappyNovsky вдохновлён оригинальной Flappy Bird: пролёт между препятствиями, набор
+            очков, точный тайминг и высокий темп.
+          </p>
+          <p>
+            Отличия: магазин скинов, медали ЛДПР, редкие медали, бонус двойного прыжка,
+            достижения, пасхалки и победная анимация с конфетти.
+          </p>
+          <button class="action-btn action-btn--primary" data-open="menu">Вернуться в меню</button>
+        </div>
+      </section>
+
+      <section class="panel" id="about-devs-screen">
+        <div class="panel-card">
+          <h2>О разработчиках</h2>
+          <p>
+            Проект собран как автономная HTML5-игра: запускается локально и хранит прогресс в
+            браузере.
+          </p>
+          <p>
+            Для добавления ассетов используйте папки <code>assets/heads</code>,
+            <code>assets/coins</code>, <code>assets/audio</code>.
+          </p>
+          <button class="action-btn action-btn--primary" data-open="menu">Вернуться в меню</button>
+        </div>
+      </section>
+    </main>
+
+    <script defer src="./game.js"></script>
+  </body>
+</html>
