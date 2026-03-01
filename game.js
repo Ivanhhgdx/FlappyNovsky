@@ -78,7 +78,7 @@ let WIDTH = BASE_WIDTH;
 let HEIGHT = BASE_HEIGHT;
 let PLAYER_X = 228;
 let PLAYER_RADIUS = 34;
-let PIPE_WIDTH = 122;
+let PIPE_WIDTH = 108;
 let PIPE_SPACING = 306;
 let PIPE_SHIFT_LIMIT = 76;
 let PIPE_TOP_MARGIN = 76;
@@ -1036,7 +1036,7 @@ function applyViewportMetrics() {
 
   PLAYER_RADIUS = Math.round(Math.min(WIDTH, HEIGHT) * (IS_PORTRAIT_LAYOUT ? 0.067 : 0.063));
   PLAYER_X = Math.round(WIDTH * (IS_PORTRAIT_LAYOUT ? 0.27 : 0.2375));
-  PIPE_WIDTH = Math.round(WIDTH * (IS_PORTRAIT_LAYOUT ? 0.235 : 0.162));
+  PIPE_WIDTH = Math.round(WIDTH * (IS_PORTRAIT_LAYOUT ? 0.208 : 0.14));
   PIPE_SPACING = Math.round(WIDTH * (IS_PORTRAIT_LAYOUT ? 0.62 : 0.319));
   PIPE_SHIFT_LIMIT = Math.round(HEIGHT * (IS_PORTRAIT_LAYOUT ? 0.07 : 0.14));
   PIPE_TOP_MARGIN = Math.round(HEIGHT * 0.13);
@@ -3319,13 +3319,10 @@ function collidesWithPipe(player, pipe, collisionRadius) {
   const topHeight = pipe.gapY - pipe.gap * 0.5;
   const bottomY = pipe.gapY + pipe.gap * 0.5;
   const r = Math.max(6, collisionRadius || player.r);
-  const xInset = Math.max(4, pipe.width * 0.08);
-  const hitX = pipe.x + xInset;
-  const hitW = Math.max(12, pipe.width - xInset * 2);
 
   return (
-    circleRectCollision(player.x, player.y, r, hitX, 0, hitW, topHeight) ||
-    circleRectCollision(player.x, player.y, r, hitX, bottomY, hitW, HEIGHT - bottomY)
+    circleRectCollision(player.x, player.y, r, pipe.x, 0, pipe.width, topHeight) ||
+    circleRectCollision(player.x, player.y, r, pipe.x, bottomY, pipe.width, HEIGHT - bottomY)
   );
 }
 
