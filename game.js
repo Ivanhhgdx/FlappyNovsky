@@ -3152,14 +3152,14 @@ function drawPlayer(visible) {
 
 function drawHeadSprite(x, y, r, angle, expression) {
   const skin = skinCatalog[profile.selectedSkin] || skinCatalog.common;
-  const image = skins[skin.id];
+  const sprite = skins[skin.id];
 
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  if (image && image.loaded && image.element) {
-    drawSkinImageRaw(image.element, r);
+  if (sprite && sprite.loaded && sprite.element) {
+    drawSkinImageRaw(sprite, r);
   } else {
     drawFallbackFace(r);
   }
@@ -3169,17 +3169,19 @@ function drawHeadSprite(x, y, r, angle, expression) {
   ctx.restore();
 }
 
-function drawSkinImageRaw(image, r) {
+function drawSkinImageRaw(sprite, r) {
+  const image = sprite.element;
   const sw = image.naturalWidth || image.width;
   const sh = image.naturalHeight || image.height;
+  const crop = sprite.crop || { x: 0, y: 0, w: sw, h: sh };
 
-  if (!sw || !sh) {
+  if (!sw || !sh || !crop.w || !crop.h) {
     drawFallbackFace(r);
     return;
   }
 
   let targetH = r * 2.7;
-  let targetW = targetH * (sw / sh);
+  let targetW = targetH * (crop.w / crop.h);
   const maxW = r * 3.8;
   if (targetW > maxW) {
     const k = maxW / targetW;
@@ -3189,7 +3191,17 @@ function drawSkinImageRaw(image, r) {
 
   const prevSmoothing = ctx.imageSmoothingEnabled;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(image, -targetW * 0.5, -targetH * 0.56, targetW, targetH);
+  ctx.drawImage(
+    image,
+    crop.x,
+    crop.y,
+    crop.w,
+    crop.h,
+    -targetW * 0.5,
+    -targetH * 0.56,
+    targetW,
+    targetH
+  );
   ctx.imageSmoothingEnabled = prevSmoothing;
 }
 
@@ -3620,14 +3632,17 @@ function loadSkinImages() {
     skins[skin.id] = {
       loaded: false,
       element: img,
+      crop: null,
     };
 
     img.onload = () => {
       skins[skin.id].loaded = true;
+      skins[skin.id].crop = analyzeOpaqueBounds(img);
     };
 
     img.onerror = () => {
       skins[skin.id].loaded = false;
+      skins[skin.id].crop = null;
     };
 
     img.src = skin.src;
